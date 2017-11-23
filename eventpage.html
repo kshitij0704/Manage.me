@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Manage.me - event</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="./static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="./static/css/sb-admin.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="./static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <script src='./static/lib/moment.min.js'></script>
+
+</head>
+
+<body>
+        <script src="https://github.com/hasura/js-sdk/releases/download/v0.1.3/hasura.min.js"></script>
+<script>
+        hasura.setProject('fervid72');
+    
+    if(hasura.user.token==null){
+            window.location="./login.html"
+        }
+</script>
+    <script src="./static/js/eventhandler.js"></script>
+    
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img class="navbar-brand" src="http://cdn.warer.com/media/Analogue-Vista-Clock-logo.png" style="padding-right: 0;width: 10%">
+                <a class="navbar-brand" href="./index.html"><b>Manage.me</b></a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav"> 
+                
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" ><i class="fa fa-user"></i> <span id="uiusername"> User </span> <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="./accountsettings.html"><i class="fa fa-fw fa-user"></i> Settings</a>
+                        </li>                 
+                        <li>
+                            <a onclick="logoutaction()"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="dashboard.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="https://medium.com/@k.sachdeva0704/4-1-manage-me-dashboard-a0e405166e33" target="_blank"><i class="fa fa-fw fa-file"></i> Help Docs</a>
+                    </li>
+                    <li>
+                        
+                        <a href="./contact.html"><i class="fa fa-fw fa-edit"></i> Contact Us</a>
+                    </li>
+                                       
+                    
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header" id="etholder">
+                            
+                        </h1>
+                        <ol class="breadcrumb">
+                            <li>
+                                <i class="fa fa-dashboard"></i>  <a href="dashboard.html">Dashboard</a>
+                            </li>
+                            <li class="active" >
+                                <i class="fa fa-file" id="etholder2"> </i> 
+                            </li>
+                        </ol>
+                        <div class="alert alert-success " id="updatesuccess" style="display:none;" >
+                         <strong>Event Updated successfuly !</strong>
+                        </div>
+                        <div class="alert alert-warning " id="updatesync" style="display:none;" >
+                         <strong>Syncing Updates...</strong>
+                        </div>
+                        <div class="alert alert-danger " id="updatefailed" style="display:none;" >
+                         <strong>Oh Snap !</strong> Could not sync updtaes to server
+                        </div>
+                        <div class="alert alert-danger " id="improperdata" style="display:none;" >
+                         <strong>Unrecognized Format for Color Feild</strong> please use properly formatted <a href="https://www.google.co.in/search?q=color+picker&oq=colo&aqs=chrome.0.69i59j69i57j0l2j69i60j0.2189j0j8&sourceid=chrome&ie=UTF-8"> hex codes</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+                 <div class="row">
+                    <div class="col-lg-8">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>Update Details</h3>
+                            </div>
+                            <div class="panel-body">
+                                   <form role="form" name="eventupdate">
+                                        <div class="form-group">
+                                            <label>Event Title</label>
+                                            <input class="form-control" name="Title" type="text" id ="Title" placeholder="Title">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Event Goal Category</label>
+                                            <input class="form-control" name="category" type="text" id="category" placeholder="category">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Event Description</label>
+                                            <textarea class="form-control" rows="3" type="text" name="description" id="description" placeholder="Null"></textarea>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Event Color</label>
+                                            <input class="form-control" name="color" type="text" id="color" placeholder="default">
+                                        </div>
+
+                                        <button type="button" class="btn btn-primary" onclick="syncupdates()">Update Event Details</button>
+                                        <button type="button" class="btn btn-danger" onclick="deleteevent()">Delete Event</button>
+                                        <button type="button" class="btn btn-warning" onclick="discard()">Discard Updates</button>
+                                   </form>
+                               </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>Static Info</h3>
+                            </div>
+                            <div class="panel-body">
+                                   <form role="form" name="sinfo">
+                                        <div class="form-group">
+                                            <label>Event ID</label>
+                                            <p class="form-control-static" id="id"></p>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>FROM</label>
+                                            <p class="form-control-static" id="From">date</p>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>TO</label>
+                                            <p class="form-control-static" id="to">date</p>
+                                        </div>
+                                   </form>
+                               </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    <script src="./static/js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="./static/js/bootstrap.min.js"></script>
+    <script >
+    var eventdata = retrievedata();
+         $("#uiusername").text(hasura.user.username);
+
+         $("#etholder").text(eventdata.title)
+         $("#etholder2").text(" "+eventdata.title)
+         var d1 = moment(eventdata.start);
+            var d2 = moment(eventdata.end);
+         $("#id").text(eventdata.id)
+         $("#From").text(d1.toDate())
+         $("#to").text(d2.toDate())
+    </script>
+
+    <script>
+        var updateventdata;
+                    function mySuccessHandler (data) {
+                     updateventdata = data;
+                    $("#Title").attr("placeholder",updateventdata["0"].title);
+                    $("#category").attr("placeholder",updateventdata["0"].category);
+
+                    if(updateventdata["0"].color){
+                        $("#color").attr("placeholder",updateventdata["0"].color);
+
+                    }
+
+                    if(updateventdata["0"].description)
+                    {
+                        $("#description").attr("placeholder",updateventdata["0"].description);
+                    }
+                     
+                     console.log (data)
+                    }
+
+                    function myErrorHandler (e) {
+                        alert("Error fetching event data " + e);
+                        window.location="./dashboard.html"
+                    }
+
+                    hasura.data.query({
+                        type: 'select',
+                        args: {
+                            table: 'eventstore',
+                            columns: ['title','color','description','category'],
+                            where:{
+                                "id":eventdata.id
+                            }
+                        }
+
+                        
+                        
+                    },
+                      mySuccessHandler,
+                      myErrorHandler
+                    );
+
+            function syncupdates (){
+                     $("#updatesuccess").css("display","none");
+                        $("#updatefailed").css("display","none");
+                        $("#improperdata").css("display","none");
+                        $("#updatesync").css("display","block");
+                    var newtitle = document.forms["eventupdate"]["Title"].value;
+                    var newcategory = document.forms["eventupdate"]["category"].value;
+                    var newdes = document.forms["eventupdate"]["description"].value;
+                    var newcolor = document.forms["eventupdate"]["color"].value;
+                    var flag = true;
+                    if(newtitle!=""){
+                        updateventdata["0"].title = newtitle;
+                    }
+
+                    if(newcategory!=""){
+                        newcategory=newcategory.toUpperCase();
+                        updateventdata["0"].category = newcategory;
+                    }
+
+                    if(newdes!=""){
+                        updateventdata["0"].description = newdes;
+                    }
+
+                    if(newcolor!=""){
+                        var res =newcolor.match(/[#][a-f,0-9]{6}/);
+
+                        if(res){
+                        updateventdata["0"].color = newcolor;}
+                        else{
+                             $("#updatesuccess").css("display","none");
+                        $("#updatefailed").css("display","none");
+                        $("#improperdata").css("display","block");
+                        $("#updatesync").css("display","none");
+                            flag=false;
+                        }
+                    }
+                    if(flag){
+                     function mySuccessHandler (data) {
+                        //alert("Event updated successfully");
+                        //window.location="./dashboard.html"   
+                        $("#updatesuccess").css("display","block");
+                        $("#updatefailed").css("display","none");
+                        $("#improperdata").css("display","none");
+                        $("#updatesync").css("display","none");
+                    }
+
+                    function myErrorHandler (e) {
+                        //alert("Event update not synced, changes will be lost on reload. Reason : " + e);
+                        //window.location="./dashboard.html"
+                         $("#updatesuccess").css("display","none");
+                        $("#updatefailed").css("display","block");
+                        $("#improperdata").css("display","none");
+                        $("#updatesync").css("display","none");
+                    }
+
+                    hasura.data.query({
+                        "type" : "update",
+                        "args" : {
+                            
+                            "table" : "eventstore",
+                            "$set" : {
+                                    "title" : updateventdata["0"].title,
+                                    "category": updateventdata["0"].category,
+                                    "description": updateventdata["0"].description,
+                                    "color" : updateventdata["0"].color
+                            },
+                            
+                            "where":{
+                                "id":eventdata.id
+                        
+                            }
+                        }
+                        
+                        
+                    },
+                      mySuccessHandler,
+                      myErrorHandler
+                    );
+                }
+            }
+            
+
+            function deleteevent(){
+
+                    function mySuccessHandler (data) {                          
+                        delete updateventdata;
+                        cleardata();
+                        alert("Event Deleted !!");
+                        window.location="./dashboard.html"
+                    }
+
+                    function myErrorHandler (e) {
+                        alert("Cannot delete event record from database.");
+                        console.log(e);
+                         
+                    }
+
+                    hasura.data.query({
+                        "type" : "delete",
+                        "args" : {
+                            
+                            "table" : "eventstore",
+                                                        
+                            "where":{
+                                "id":eventdata.id
+                        
+                            }
+                        }
+                        
+                        
+                    },
+                      mySuccessHandler,
+                      myErrorHandler
+                    );
+
+            }
+
+            function discard(){
+                delete updateventdata;
+                        cleardata();
+                        window.location="./dashboard.html"
+
+            }
+    </script>
+
+    <script>
+    function logoutaction(){
+        function mySuccessHandler (data) {
+          console.log(data);
+          window.location="./login.html"
+        }
+
+        function myErrorHandler (e) {
+          console.log(e);
+        }
+
+        hasura.auth.logout(
+          mySuccessHandler,
+          myErrorHandler
+        );
+    }
+</script>
+
+</body>
+
+</html>

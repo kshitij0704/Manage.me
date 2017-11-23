@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Manage.me Dashboard</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="./static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="./static/css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <!--<link href="css/plugins/morris.css" rel="stylesheet">-->
+
+    <!-- Custom Fonts -->
+    <link href="./static/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link href='./static/fullcalendar.min.css' rel='stylesheet' />
+    <link href='./static/fullcalendar.print.min.css' rel='stylesheet' media='print' />
+    <script src='./static/lib/moment.min.js'></script>
+    <script src='./static/lib/jquery.min.js'></script>
+    <script src='./static/fullcalendar.min.js'></script>
+  
+
+</head>
+
+<body>
+<script src="https://github.com/hasura/js-sdk/releases/download/v0.1.3/hasura.min.js"></script>
+<script src="./static/js/eventhandler.js"></script>
+<script>
+        hasura.setProject('fervid72');
+</script>
+<script>
+    if(hasura.user.token==null){
+            window.location="./login.html"
+        }
+</script>
+<script src="./static/js/bootstrap.min.js"></script>
+<script>
+    function logoutaction(){
+        function mySuccessHandler (data) {
+          console.log(data);
+          window.location="./login.html"
+        }
+
+        function myErrorHandler (e) {
+          console.log(e);
+        }
+
+        hasura.auth.logout(
+          mySuccessHandler,
+          myErrorHandler
+        );
+    }
+</script>
+
+
+<script>        
+    
+    $(document).ready(function() {
+        
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            navLinks: true, // can click day/week names to navigate views
+            selectable: true,
+            selectHelper: true,
+            select: function(start, end) {
+                    
+                var title = prompt('Event Title:');
+                var check = false;
+                if ((title!=null)&&(title!="")){check = true; var category = prompt('Enter Event Category, Leave blank if uncategorized');}
+                
+                if(check){
+                if ((category==null)||(category=="")){category='UNCATEGORIZED';}
+                    $("#success").css("display","none");
+                    $("#process").css("display","block");
+                    $("#failed").css("display","none");
+                category=category.toUpperCase();
+                var eventData;
+                //var d1 = moment(start.format());
+                //var d2 = moment(end.format());
+                //var duration = d2.diff(d1,'seconds');
+                //var duration = Math.floor(diff/1e3);
+                
+                
+                function mySuccessHandler (data) {
+                    eventData = {
+                        id: data.returning["0"].id,
+                        title: title,
+                        start: start,
+                        end: end
+                    };
+                    $('#calendar').fullCalendar('renderEvent', eventData, true); 
+                    $("#success").css("display","block");
+                    $("#process").css("display","none");
+                    $("#failed").css("display","none");  
+                }
+
+                function myErrorHandler (e) {
+                    $("#success").css("display","none");
+                    $("#process").css("display","none");
+                    $("#failed").css("display","block");
+                    console.log(e);
+                }
+
+                hasura.data.query({
+                    "type" : "insert",
+                    "args" : {
+                        
+                        "table" : "eventstore",
+                        "objects" : [{
+                            "title" : title,
+                            "category" : category,
+                            "start" : start.format(),
+                            "end"   : end.format(),
+                            "user_id":hasura.user.id
+                           // "duration" : duration 
+                            
+                            }],
+                        "returning" : ["id"]
+                            
+                    }
+                },
+                  mySuccessHandler,
+                  myErrorHandler
+                );
+            }
+                $('#calendar').fullCalendar('unselect');
+
+            },
+            editable: true,
+            eventLimit: true, // allow "more" link when too many events
+            allDaySlot: true,
+            events:function(start,end,timezone,callback){
+                        function mySuccessHandler (data) {
+                        callback(data)
+
+                        }
+
+                        function myErrorHandler (e) {
+                        console.log(e);
+                        alert("failed to connect to server, check your network connection");
+                        }
+
+                        hasura.data.query({
+                        type: 'select',
+                        args: {
+                        table: 'eventstore',
+                        columns: ['id','title','start','end','color']
+                        }},
+                        mySuccessHandler,
+                        myErrorHandler
+                        );
+
+                    },
+            eventDrop: function(calevent, delta, revertFunc) {
+                        var flag = false;
+                    if(calevent.end==null){calevent.end = moment(calevent.start).add(2, 'hours'); flag = true}
+                    
+                	$("#success").css("display","none");
+                	$("#process").css("display","block");
+                	$("#failed").css("display","none");
+                    
+                    function mySuccessHandler (data) {
+                    $("#success").css("display","block");
+                	$("#process").css("display","none");
+                	$("#failed").css("display","none");
+                        if(flag){
+                            $('#calendar').fullCalendar( 'refetchEvents' );
+                        }  
+                        flag=false; 
+                    }
+
+                    function myErrorHandler (e) {
+                    $("#success").css("display","none");
+                	$("#process").css("display","none");
+                	$("#failed").css("display","block");
+                    console.log(e)
+                    revertFunc();
+                    }
+
+                    hasura.data.query({
+                        "type" : "update",
+                        "args" : {
+                            
+                            "table" : "eventstore",
+                            "$set" : {
+                                    "start":calevent.start,
+                                    "end":calevent.end
+                            },
+                            
+                            "where":{
+                                "id":calevent.id
+                        
+                            }
+                        }
+                        
+                        
+                    },
+                      mySuccessHandler,
+                      myErrorHandler
+                    );
+                
+
+            },
+            eventResize: function(event, delta, revertFunc) {
+
+                	$("#success").css("display","none");
+                	$("#process").css("display","block");
+                	$("#failed").css("display","none");
+
+                    function mySuccessHandler (data) {
+                    $("#success").css("display","block");
+                	$("#process").css("display","none");
+                	$("#failed").css("display","none");   
+
+                    }
+
+                    function myErrorHandler (e) {
+                    revertFunc();
+                    $("#success").css("display","none");
+                	$("#process").css("display","none");
+                	$("#failed").css("display","block");
+                    console.log(e)
+                    }
+
+                    hasura.data.query({
+                        "type" : "update",
+                        "args" : {
+                            
+                            "table" : "eventstore",
+                            "$set" : {
+                                    "start":event.start,
+                                    "end":event.end
+                            },
+                            
+                            "where":{
+                                "id":event.id
+                        
+                            }
+                        }
+                        
+                        
+                    },
+                      mySuccessHandler,
+                      myErrorHandler
+                    );
+
+                
+
+            },
+            eventClick: function(calEvent, jsEvent, view) {
+
+	        	clickeventData = {
+                        id: calEvent.id,
+                        title: calEvent.title,
+                        start: calEvent.start,
+                        end: calEvent.end
+                    };
+
+                storedata(clickeventData);
+                window.location="./eventpage.html"
+
+	        
+
+    }
+        });
+        
+    });
+
+</script>
+
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <img class="navbar-brand" src="http://cdn.warer.com/media/Analogue-Vista-Clock-logo.png" style="padding-right: 0;width: 10%">
+                <a class="navbar-brand" href="./index.html"><b>Manage.me</b></a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav"> 
+                
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" ><i class="fa fa-user"></i> <span id="uiusername"> User </span> <b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="./accountsettings.html"><i class="fa fa-fw fa-user"></i> Settings</a>
+                        </li>                 
+                        <li>
+                            <a href="#" onclick="logoutaction()"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li class="active">
+                        <a href="dashboard.html"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="https://medium.com/@k.sachdeva0704/4-1-manage-me-dashboard-a0e405166e33" target="_blank"><i class="fa fa-fw fa-file"></i> Help Docs</a>
+                    </li>
+                    <li>
+                        
+                        <a href="./contact.html"><i class="fa fa-fw fa-edit"></i> Contact Us</a>
+                    </li>
+                                       
+                    
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Dashboard <small>Schedule</small>
+                        </h1>
+                    </div>
+                </div>
+                <!-- /.row -->
+
+                
+                <!-- /.row -->
+
+               
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="alert alert-success " id="success" style="display:none;" >
+                                <strong>Synced Successfully !</strong>
+                            </div>
+
+                            <div class="alert alert-warning " id="process" style="display:none;" >
+                                <strong>Syncing changes...</strong>
+                            </div>
+
+                            <div class="alert alert-danger " id="failed" style="display:none;" >
+                                <strong>Oh Snap!</strong> could not sync changes to the server.
+                            </div>
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <h3 class="panel-title"><i class="fa fa-bar-chart-o fa-fw"></i>Time Manager</h3>
+                            </div>
+                            <div class="panel-body">
+                               <div id='calendar'></div>
+                            </div>
+                        </div>
+                    		
+                    </div>
+
+                </div>
+                <!-- /.row -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="alert alert-info alert-dismissable">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <i class="fa fa-info-circle"></i>  <strong>New to Manage.me ?</strong> Try out <a href="https://medium.com/@k.sachdeva0704/4-1-manage-me-dashboard-a0e405166e33" class="alert-link" target="_blank">Help Docs</a> for detailed flow on how to use me.
+                        </div>
+                    </div>
+                </div>
+
+               
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <script>        
+        $("#uiusername").text(hasura.user.username);
+    </script>
+    <!-- /#wrapper -->
+
+    <!-- jQuery -->
+    
+
+    <!-- Bootstrap Core JavaScript -->
+    
+
+    <!-- Morris Charts JavaScript -->
+
+
+</body>
+
+</html>
